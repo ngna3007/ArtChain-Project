@@ -99,7 +99,7 @@ To run the AI agent, use the following command:
 For the OpenAI token, go to this site: https://platform.openai.com/.
 And then type this cmd:
 
-    export OPEN_API_KEY="your_api_key_here"
+    export OPENAI_API_KEY="your_api_key_here"
 
 ❓ Need Help?
 If you encounter any issues during setup, feel free to open an issue on GitHub.
