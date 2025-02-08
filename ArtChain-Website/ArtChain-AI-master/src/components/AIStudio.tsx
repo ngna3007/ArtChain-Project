@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Wand2, History, Save, Download, Share2, Sparkles, Palette, RefreshCw, Trash2, Image } from 'lucide-react';
+import { Wand2, History, Save, Download, Share2, Sparkles, Palette, RefreshCw, Trash2, MessageSquare, Image } from 'lucide-react';
 import axios from 'axios';
+import { marked } from 'marked';
 
 interface PromptHistory {
   id: string;
@@ -15,7 +16,26 @@ export default function AIStudio() {
   const [selectedStyle, setSelectedStyle] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [promptHistory, setPromptHistory] = useState<PromptHistory[]>([]);
+  const [simpleGeneratedImage, setSimpleGeneratedImage] = useState<string | null>(null);
+  const [chatGeneratedImage, setChatGeneratedImage] = useState<string | null>(null);
+  const [interfaceMode, setInterfaceMode] = useState<'simple' | 'chat'>('simple');
+  const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([
+    { role: 'assistant', content: 'Hello! I\'m your AI art assistant. I can help you generate images and adjust settings. What would you like to create today?' }
+  ]);
+  const [promptHistory, setPromptHistory] = useState<PromptHistory[]>([
+    {
+      id: '1',
+      prompt: 'A cyberpunk city at night with neon signs and flying cars',
+      timestamp: '2 minutes ago',
+      style: 'Super Ani'
+    },
+    {
+      id: '2',
+      prompt: 'Abstract representation of human consciousness',
+      timestamp: '15 minutes ago',
+      style: 'Digital Surrealism'
+    }
+  ]);
 
   const unlockedStyles = [
     {
@@ -34,24 +54,20 @@ export default function AIStudio() {
 
   const handleGenerate = async () => {
     if (!prompt || !selectedStyle) return;
-
     setIsGenerating(true);
 
     try {
-      // Call the Stable Diffusion API
       const response = await axios.get('http://127.0.0.1:8000/', {
         params: {
           prompt: prompt,
-          style: selectedStyle // Pass the selected style to the API
+          style: selectedStyle
         },
-        responseType: 'blob' // Handle binary image data
+        responseType: 'blob'
       });
 
-      // Convert the image blob to a URL
       const imageUrl = URL.createObjectURL(response.data);
-      setGeneratedImage(imageUrl);
+      setSimpleGeneratedImage(imageUrl); // Update to use simple mode state
 
-      // Add the generated image to the prompt history
       setPromptHistory(prev => [{
         id: Date.now().toString(),
         prompt,
@@ -70,9 +86,92 @@ export default function AIStudio() {
     setPromptHistory([]);
   };
 
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim()) return;
+
+    // Add user message to chat
+    setChatHistory(prev => [...prev, { role: 'user', content: prompt }]);
+    const userPrompt = prompt;
+    setPrompt('');
+    setIsGenerating(true);
+
+    try {
+      const response = await axios.post('http://localhost:8001/chat/', {
+        message: userPrompt
+      }, {
+        responseType: 'arraybuffer', // Handle both text and image responses
+        headers: {
+          'Accept': 'application/json, image/*' // Accept both JSON and image responses
+        }
+      });
+
+      // Check if the response is an image (based on content-type header)
+      const contentType = response.headers['content-type'];
+
+      if (contentType.startsWith('image/')) {
+        const blob = new Blob([response.data], { type: contentType });
+        const imageUrl = URL.createObjectURL(blob);
+
+        setChatGeneratedImage(imageUrl); // Update to use chat mode state
+
+        setChatHistory(prev => [...prev, {
+          role: 'assistant',
+          content: 'I\'ve generated an image based on your request:'
+        }]);
+
+        setPromptHistory(prev => [{
+          id: Date.now().toString(),
+          prompt: userPrompt,
+          timestamp: 'Just now',
+          style: selectedStyle || 'Default',
+          image: imageUrl
+        }, ...prev]);
+
+      } else {
+        // Handle text response
+        // Convert arraybuffer to text if it's a JSON response
+        const textDecoder = new TextDecoder('utf-8');
+        const responseData = JSON.parse(textDecoder.decode(response.data));
+
+        setChatHistory(prev => [...prev, {
+          role: 'assistant',
+          content: responseData.response
+        }]);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setChatHistory(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error while processing your request. Please try again.'
+      }]);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Interface Mode Toggle */}
+        <div className="flex space-x-4 mb-8">
+          <button
+            onClick={() => setInterfaceMode('simple')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${interfaceMode === 'simple' ? 'bg-purple-600' : 'bg-gray-700'
+              }`}
+          >
+            <Image className="w-5 h-5" />
+            <span>Simple Mode</span>
+          </button>
+          <button
+            onClick={() => setInterfaceMode('chat')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${interfaceMode === 'chat' ? 'bg-purple-600' : 'bg-gray-700'
+              }`}
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span>Chat Mode</span>
+          </button>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Generation Area */}
           <div className="lg:col-span-2 space-y-8">
@@ -108,54 +207,132 @@ export default function AIStudio() {
                 </div>
               </div>
 
-              {/* Simple Mode Interface */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Prompt</label>
-                <div className="relative">
-                  <textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Describe the artwork you want to generate..."
-                    className="w-full h-32 bg-gray-900/50 rounded-lg p-4 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  />
-                  <div className="absolute right-2 bottom-2">
-                    <button
-                      onClick={handleGenerate}
-                      disabled={!prompt || !selectedStyle || isGenerating}
-                      className={`px-4 py-2 rounded-lg flex items-center gap-2 ${isGenerating ? 'bg-purple-600/50' : 'bg-purple-600 hover:bg-purple-700'} transition-all`}
-                    >
-                      {isGenerating ? (
-                        <>
-                          <RefreshCw className="w-5 h-5 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-5 h-5" />
-                          Generate
-                        </>
-                      )}
-                    </button>
+              {interfaceMode === 'simple' ? (
+                // Simple Mode Interface
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Prompt</label>
+                  <div className="relative">
+                    <textarea
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Describe the artwork you want to generate..."
+                      className="w-full h-32 bg-gray-900/50 rounded-lg p-4 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                    <div className="absolute right-2 bottom-2">
+                      <button
+                        onClick={handleGenerate}
+                        disabled={!prompt || !selectedStyle || isGenerating}
+                        className={`px-4 py-2 rounded-lg flex items-center gap-2 ${isGenerating ? 'bg-purple-600/50' : 'bg-purple-600 hover:bg-purple-700'
+                          } transition-all`}
+                      >
+                        {isGenerating ? (
+                          <>
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" />
+                            Generate
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                // Chat Mode Interface
+                <div className="mb-6">
+                  <div className="bg-gray-900/50 rounded-lg p-4 h-[50vh] mb-4 overflow-y-auto">
+                    {chatHistory.map((message, index) => (
+                      <div
+                        key={index}
+                        className={`mb-4 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
+                      >
+                        <div
+                          className={`
+                            inline-block rounded-lg px-6 py-3 max-w-[90%]
+                            ${message.role === 'user'
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-gray-800 border border-gray-700 text-gray-100'
+                            }
+                            prose prose-invert prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700
+                            ${message.role === 'assistant' ? 'prose-p:my-2 prose-code:text-purple-400 prose-code:bg-gray-900/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded' : ''}
+                          `}
+                          style={{
+                            lineHeight: '1.6',
+                            fontFamily: message.role === 'assistant' ? 'system-ui, -apple-system, sans-serif' : 'inherit'
+                          }}
+                        >
+                          {message.role === 'assistant'
+                            ? <div dangerouslySetInnerHTML={{
+                              __html: marked(message.content, { breaks: true })
+                            }} />
+                            : message.content
+                          }
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <form onSubmit={handleChatSubmit} className="relative">
+                    <input
+                      type="text"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Chat with AI assistant..."
+                      className="w-full bg-gray-900/50 rounded-lg p-4 pr-24 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!prompt.trim() || isGenerating}
+                      className="absolute right-2 top-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all flex items-center gap-2"
+                    >
+                      <MessageSquare className="w-5 h-5" />
+                      Send
+                    </button>
+                  </form>
+                </div>
+              )}
 
               {/* Generated Image Display */}
-              <div className="aspect-square rounded-lg bg-gray-900/50 flex items-center justify-center">
-                {isGenerating ? (
-                  <div className="text-center">
-                    <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-purple-400" />
-                    <p className="text-gray-400">Creating your masterpiece...</p>
-                  </div>
-                ) : generatedImage ? (
-                  <img src={generatedImage} alt="Generated Artwork" className="w-full h-full object-cover rounded-lg" />
-                ) : (
-                  <div className="text-center text-gray-400">
-                    <Palette className="w-12 h-12 mx-auto mb-4" />
-                    <p>Your generated artwork will appear here</p>
-                  </div>
-                )}
-              </div>
+              {interfaceMode === 'simple' ? (
+                <div className="aspect-square rounded-lg bg-gray-900/50 flex items-center justify-center">
+                  {isGenerating ? (
+                    <div className="text-center">
+                      <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-purple-400" />
+                      <p className="text-gray-400">Creating your masterpiece...</p>
+                    </div>
+                  ) : simpleGeneratedImage ? (
+                    <img src={simpleGeneratedImage} alt="Generated Artwork" className="w-full h-full object-cover rounded-lg" />
+                  ) : (
+                    <div className="text-center text-gray-400">
+                      <Palette className="w-12 h-12 mx-auto mb-4" />
+                      <p>Your generated artwork will appear here</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="aspect-square rounded-lg bg-gray-900/50 flex items-center justify-center">
+                  {isGenerating ? (
+                    <div className="text-center">
+                      <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-purple-400" />
+                      <p className="text-gray-400">AI is working on your request...</p>
+                    </div>
+                  ) : chatGeneratedImage ? (
+                    <div className="relative">
+                      <img src={chatGeneratedImage} alt="Generated Artwork" className="w-full h-full object-cover rounded-lg" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                        <p className="text-sm text-white">Generated image from our conversation</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-400">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-4" />
+                      <p>Ask me to generate an image and it will appear here</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex gap-4 mt-4">
@@ -204,6 +381,6 @@ export default function AIStudio() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
