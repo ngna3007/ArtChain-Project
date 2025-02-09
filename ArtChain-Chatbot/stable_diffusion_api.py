@@ -18,14 +18,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize DirectML device
+
+# For AMD user
 dml = torch_directml.device()
+pipe = pipe.to(dml)
+
+# For CPU user
+# pipe = pipe.to("cpu")
+
+# For NVIDIA user
+#pipe = pipe.to("cuda")
+
 
 # Load Stable Diffusion model
 # Load the model with proper authentication
 model_id = "sd-legacy/stable-diffusion-v1-5"
 pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
-pipe = pipe.to(dml)
 
 # Load LoRA Model
 lora_model_path = "./Super Ani ver2_v2.0.safetensors"
