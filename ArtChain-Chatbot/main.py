@@ -7,11 +7,7 @@ from pydantic import BaseModel
 from groq import Groq
 from sd_client import StableDiffusionClient
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-import base64
-from fastapi.responses import JSONResponse, Response
-from io import BytesIO
-from PIL import Image
+from fastapi.responses import Response
 from fastapi import Request
 
 
