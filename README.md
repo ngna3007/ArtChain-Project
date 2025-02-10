@@ -87,11 +87,12 @@ Smart contracts handle transactions, including royalty distribution and payments
 | *Figure 2: AI Agent System* |
 
 This diagram illustrates an AI agent system that processes user input to generate images using Stable Diffusion. The workflow starts with the FastAPI Server, which receives user input and passes it to Intent Classification. Based on intent, the Action Type decision node directs the request:
-•	Generate Image sends the request to Stable Diffusion, which uses a LoRA Model to produce the image.
-•	Explain Settings provides details about Stable Diffusion parameters.
-•	Update Settings modifies stored user preferences.
-•	Modify Previous Image refines existing outputs using LLaMA 3.5.
-•	Handle Small Talk/Error responds to casual input.
+-	Generate Image sends the request to Stable Diffusion, which uses a LoRA Model to produce the image.
+- Explain Settings provides details about Stable Diffusion parameters.
+-	Update Settings modifies stored user preferences.
+-	Modify Previous Image refines existing outputs using LLaMA 3.5.
+-	Handle Small Talk/Error responds to casual input.
+  
 The Response Handler delivers results back to the user, ensuring smooth interaction and iterative image refinement.
 
 
