@@ -70,6 +70,7 @@ The platform ensures a seamless and intuitive creative process while leveraging 
 ## 3. Interactions
 
 ### 3.1. Workflow Overview
+![image](https://github.com/user-attachments/assets/8ebd8d45-967b-4faa-b8f0-cb840274fe4a)
 
 Users start by authenticating their wallets (Metamask, SUI Wallet, etc.). They browse art styles in the Art Gallery and select a mode:
 
