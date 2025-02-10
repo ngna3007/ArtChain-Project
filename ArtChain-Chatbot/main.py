@@ -282,7 +282,7 @@ class SD_Agent(autogen.AssistantAgent):
         return f"Generated modified image:\n{output}"
 
 
-api_key = "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"  # Replace with your actual API key
+api_key = "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"  
 agent = SD_Agent(api_key)
     
 @app.api_route("/chat/", methods=["GET", "POST"])
