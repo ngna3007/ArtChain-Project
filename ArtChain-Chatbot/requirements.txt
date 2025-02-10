@@ -38,3 +38,7 @@ onnx==1.16.2
 onnxruntime
 optimum>=1.23
 olive-ai
+torch-directml
+peft
+groq
+autogen
