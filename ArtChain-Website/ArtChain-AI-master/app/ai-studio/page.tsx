@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient} from "@mysten/dapp-kit";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { marked } from 'marked';
+import NextImage from 'next/image';
 
 
 interface PromptHistory {
@@ -34,7 +35,7 @@ export default function AIStudio() {
   const [currentChatGeneratedImage, setCurrentChatGeneratedImage] = useState<string | null>(null);
   const [interfaceMode, setInterfaceMode] = useState<'simple' | 'chat'>('simple');
   const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([
-    { role: 'assistant', content: 'Hello! I\'m your AI art assistant. I can help you generate images and adjust settings. What would you like to create today?' }
+    { role: 'assistant', content: 'Hello! I&apos;m your AI art assistant. I can help you generate images and adjust settings. What would you like to create today?' }
   ]);
 
   const [simpleIpfsImageUrl, setSimpleIpfsImageUrl] = useState(""); // Store the uploaded IPFS URL of simple image
@@ -54,10 +55,7 @@ export default function AIStudio() {
 
 
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-// Function to get SUI price in USD
-  useEffect(() => {
-    updateUSDPrice();
-  }, [interfaceMode, mintPrice, mintPriceChat]);
+
 
   console.log('Mint price (normal mode)', mintPrice);
   console.log('Mint price (chat mode)',mintPriceChat);
@@ -81,6 +79,11 @@ export default function AIStudio() {
       setUsdPrice(null);
     }
   };
+
+  // Function to get SUI price in USD
+  useEffect(() => {
+    updateUSDPrice();
+  }, [interfaceMode, mintPrice, mintPriceChat, updateUSDPrice]);
 
   async function uploadToIPFS(file: Blob) {
     const formData = new FormData();
@@ -403,30 +406,32 @@ export default function AIStudio() {
               </div>
                 <div className='border-b border-gray-500'></div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-8 rounded-b-lg border-b border-x border-gray-500">
-                  {unlockedStyles.map(style => (
-                    <button
-                      key={style.id}
-                      onClick={() => {setSelectedStyle(style.name)
-                        setArtistName(style.artist)
-                      } 
-                      }
-                      className={`relative rounded-lg overflow-hidden aspect-video group hover:scale-105 transition-all duration-300 ${
-                        selectedStyle === style.name ? 'ring-2 ring-purple-500' : ''
-                      }`}
-                    >
-                      <img
-                        src={style.thumbnail}
-                        alt={style.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <div className="text-center">
-                          <p className="font-semibold text-[20px]">{style.name}</p>
-                          <p className="font-semibold text-[16px] text-gray-400">{style.artist}</p>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                {unlockedStyles.map((style) => (
+                <button
+                  key={style.id}
+                  onClick={() => {
+                    setSelectedStyle(style.name);
+                    setArtistName(style.artist);
+                  }}
+                  className={`relative rounded-lg overflow-hidden aspect-video group hover:scale-105 transition-all duration-300 ${
+                    selectedStyle === style.name ? 'ring-2 ring-purple-500' : ''
+                  }`}
+                >
+                  <Image
+                    src={style.thumbnail}
+                    alt={style.name}
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="font-semibold text-[20px]">{style.name}</p>
+                      <p className="font-semibold text-[16px] text-gray-400">{style.artist}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
                 </div>
               </div>
               
@@ -559,7 +564,7 @@ export default function AIStudio() {
                       <p className="text-gray-400">Creating your masterpiece...</p>
                     </div>
                   ) : currentSimpleGeneratedImage  ? (
-                    <img src={currentSimpleGeneratedImage } alt="Generated Artwork" className="w-full h-full object-cover rounded-lg" />
+                    <NextImage src={currentSimpleGeneratedImage } alt="Generated Artwork" className="w-full h-full object-cover rounded-lg" />
                   ) : (
                     <div className="text-center text-gray-400">
                       <Palette className="w-12 h-12 mx-auto mb-4" />
@@ -578,7 +583,7 @@ export default function AIStudio() {
                     </div>
                   ) : currentChatGeneratedImage ? (
                     <div className="relative">
-                      <img src={currentChatGeneratedImage} alt="Generated Artwork" className="w-full h-full object-cover rounded-lg" />
+                      <NextImage src={currentChatGeneratedImage} alt="Generated Artwork" className="w-full h-full object-cover rounded-lg" />
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                         <p className="text-sm text-white">Generated image from our conversation</p>
                       </div>
@@ -688,7 +693,7 @@ export default function AIStudio() {
                           className={`w-full text-left ${currentSimpleGeneratedImage === item.image ? 'ring-2 ring-main_purple rounded-lg' : ''}`}>
                             <div key={item.id} className="relative bg-gray-900/50 rounded-lg overflow-hidden">
                               {item.image && (
-                                <img src={item.image} alt="Generated Artwork" className="w-full h-full object-cover" />
+                                <NextImage src={item.image} alt="Generated Artwork" className="w-full h-full object-cover" />
                               )}
                               <div className='absolute inset-0 p-4 flex flex-col justify-between bg-gradient-to-t from-black via-black/80 to-transparent'>
                                 <div className='flex justify-end'>
@@ -745,7 +750,7 @@ export default function AIStudio() {
                 className={`w-full text-left ${currentChatGeneratedImage === item.image ? 'ring-2 ring-main_purple rounded-lg' : ''}`}>
                   <div key={item.id} className="relative bg-gray-900/50 rounded-lg overflow-hidden">
                     {item.image && (
-                      <img src={item.image} alt="Generated Artwork" className="w-full h-full object-cover" />
+                      <NextImage src={item.image} alt="Generated Artwork" className="w-full h-full object-cover" />
                     )}
                     <div className='absolute inset-0 p-4 flex flex-col justify-between bg-gradient-to-t from-black via-black/80 to-transparent'>
                       <div className='flex justify-end'>
