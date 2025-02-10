@@ -71,15 +71,29 @@ The platform ensures a seamless and intuitive creative process while leveraging 
 
 ### 3.1. Workflow Overview
 ![image](https://github.com/user-attachments/assets/8ebd8d45-967b-4faa-b8f0-cb840274fe4a)
+|:---------------------------------:|
+| *Figure 1: System Workflow* |
 
-Users start by authenticating their wallets (Metamask, SUI Wallet, etc.). They browse art styles in the Art Gallery and select a mode:
+The workflow diagram outlines the AI-powered NFT image generator on the SUI blockchain, detailing the user journey from authentication to NFT creation and transactions.
 
-- **Premium Mode**: The AI agent helps refine prompts and explains Stable Diffusion settings before generating an image.
-- **Standard Mode**: Stable Diffusion generates images directly based on user input.
+Users begin by verifying their Web3 wallet or creating a new one. After logging in, they explore the Art Gallery and select between Premium Mode and Standard Mode for AI-generated artwork. In Premium Mode, users can refine prompts and adjust Stable Diffusion settings, while Standard Mode directly generates images with a LoRA-enhanced model.
 
-Once generated, users can mint their artwork as an NFT. If they have Premium access, minting is free; otherwise, they must pay a fee. The system stores the artwork on Pinata (IPFS), generates metadata, and registers the NFT on the SUI blockchain. The NFT is then transferred to the user's wallet.
+Once artwork is created, users can mint it as an NFT. Premium users mint without extra charges, while others pay a generation fee. Approved NFTs are stored on Pinata (IPFS), with metadata passed to the smart contract for minting on SUI blockchain. The NFT is then sent to the user’s wallet.
 
-Financial transactions, including royalties, are handled by smart contracts, ensuring transparent fund distribution.
+Smart contracts handle transactions, including royalty distribution and payments. After minting, users can keep or trade their NFT, ensuring ongoing engagement.
+
+![image](https://github.com/user-attachments/assets/c082ac8a-3158-41ea-8e0b-21e51bd85863)
+|:---------------------------------:|
+| *Figure 2: AI Agent System* |
+
+This diagram illustrates an AI agent system that processes user input to generate images using Stable Diffusion. The workflow starts with the FastAPI Server, which receives user input and passes it to Intent Classification. Based on intent, the Action Type decision node directs the request:
+•	Generate Image sends the request to Stable Diffusion, which uses a LoRA Model to produce the image.
+•	Explain Settings provides details about Stable Diffusion parameters.
+•	Update Settings modifies stored user preferences.
+•	Modify Previous Image refines existing outputs using LLaMA 3.5.
+•	Handle Small Talk/Error responds to casual input.
+The Response Handler delivers results back to the user, ensuring smooth interaction and iterative image refinement.
+
 
 ### 3.2. System Interaction
 
