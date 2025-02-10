@@ -25,7 +25,7 @@ The platform ensures a seamless and intuitive creative process while leveraging 
 ### 2.2. Backend Infrastructure
 
 #### 2.2.1. Tech Stack
-- FastAPI (or Flask) for handling API requests efficiently.
+- FastAPI for handling API requests efficiently.
 - Python as the primary backend language for AI processing and API development.
 - AutoGen to manage AI agent workflows, including self-reflection and iterative improvements.
 - LLaMA 3.5 as the core large language model (LLM) for text-based interactions.
