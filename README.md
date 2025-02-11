@@ -1,6 +1,6 @@
-Our web deployed on Vercel is frontend only. Due to the limit budget, we cannot deploy the AI API on render: https://art-chain-ai-delta.vercel.app/
+### Our web deployed on Vercel is frontend only. Due to the limit budget, we cannot deploy the AI API on render: https://art-chain-ai-delta.vercel.app/
 
-Project from student team of Swinburne Universiy:
+Project from student team of Swinburne Universiy from Vietnam:
 - Nguyen Ngoc Anh
 - Nguyen Thien Phuoc
 - Le Hoang Long
