@@ -1,3 +1,11 @@
+Our web deployed on Vercel is frontend only. Due to the limit budget, we cannot deploy the AI API on render: https://art-chain-ai-delta.vercel.app/
+
+Project from student team of Swinburne Universiy:
+- Nguyen Ngoc Anh
+- Nguyen Thien Phuoc
+- Le Hoang Long
+- Huynh Hoang Minh
+
 # ArtChain-Chatbot Setup Guide
 
 Welcome to the ArtChain-Chatbot setup guide! This document will walk you through the installation and configuration of the necessary dependencies to get the project up and running.
