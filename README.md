@@ -1,6 +1,6 @@
 ### Our web deployed on Vercel is frontend only. Due to the limit budget, we cannot deploy the AI API on Render: https://art-chain-ai-delta.vercel.app/
 
-Project from student team of Swinburne University from Vietnam:
+Project from student team of Swinburne University from Vietnam for Sui x Aquamove Hackathon :
 - Nguyen Ngoc Anh
 - Nguyen Thien Phuoc
 - Le Hoang Long
