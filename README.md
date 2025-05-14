@@ -3,8 +3,7 @@
 Project from student team of Swinburne University from Vietnam for Sui Typhoon Hackathon :
 - Nguyen Ngoc Anh
 - Nguyen Thien Phuoc
-- Le Hoang Long
-- Huynh Hoang Minh
+
 
 # ArtChain-Chatbot Setup Guide
 
